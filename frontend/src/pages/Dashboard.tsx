@@ -1,14 +1,14 @@
-"use client";
 import React, { useEffect, useState } from "react";
 import api from "../api/api";
-import { getUser, removeUser } from "../utils/auth";
+import { getUser, clearAuth } from "../utils/auth";
 import { useNavigate } from "react-router-dom";
+import NoteCard from "../components/NoteCard";
 
 interface Note {
   _id: string;
   title: string;
-  content: string;
-  createdAt: string;
+  body?: string;
+  createdAt?: string;
 }
 
 const Dashboard: React.FC = () => {
@@ -17,14 +17,15 @@ const Dashboard: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [newTitle, setNewTitle] = useState("");
-  const [newContent, setNewContent] = useState("");
+  const [newBody, setNewBody] = useState("");
   const user = getUser();
 
   // fetch notes
   const fetchNotes = async () => {
     try {
       const res = await api.get("/notes");
-      setNotes(res.data);
+      // backend returns { notes: [...] }
+      setNotes(res.data?.notes || []);
     } catch (err) {
       console.error("Error fetching notes:", err);
     } finally {
@@ -37,23 +38,43 @@ const Dashboard: React.FC = () => {
   }, []);
 
   const handleLogout = () => {
-    removeUser();
+    clearAuth();
     navigate("/login");
   };
 
   const handleAddNote = async () => {
-    if (!newTitle.trim() || !newContent.trim()) return;
+    if (!newTitle.trim() && !newBody.trim()) return;
     try {
+      // backend expects { title, body }
       const res = await api.post("/notes", {
         title: newTitle,
-        content: newContent,
+        body: newBody,
       });
-      setNotes([res.data, ...notes]);
+      // backend returns { note }
+      const created = res.data?.note;
+      if (created) {
+        setNotes((prev) => [created, ...prev]);
+      } else {
+        // in case backend returns the note directly
+        setNotes((prev) => [res.data, ...prev]);
+      }
       setShowModal(false);
       setNewTitle("");
-      setNewContent("");
+      setNewBody("");
     } catch (err) {
       console.error("Error adding note:", err);
+      alert("Failed to add note");
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Delete this note?")) return;
+    try {
+      await api.delete(`/notes/${id}`);
+      setNotes((prev) => prev.filter((n) => n._id !== id));
+    } catch (err) {
+      console.error("Delete error:", err);
+      alert("Failed to delete note");
     }
   };
 
@@ -61,22 +82,14 @@ const Dashboard: React.FC = () => {
     <div className="min-h-screen bg-gray-100 p-6">
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">
-          Welcome, {user?.name || "User"} 👋
-        </h1>
-        <button
-          onClick={handleLogout}
-          className="px-4 py-2 bg-red-500 text-white rounded-lg shadow hover:bg-red-600"
-        >
+        <h1 className="text-2xl font-bold text-gray-800">Welcome, {user?.name || "User"} 👋</h1>
+        <button onClick={handleLogout} className="px-4 py-2 bg-red-500 text-white rounded-lg">
           Logout
         </button>
       </div>
 
       {/* Add Note Button */}
-      <button
-        onClick={() => setShowModal(true)}
-        className="mb-6 px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700"
-      >
+      <button onClick={() => setShowModal(true)} className="mb-6 px-4 py-2 bg-blue-600 text-white rounded-lg">
         + Add Note
       </button>
 
@@ -88,18 +101,7 @@ const Dashboard: React.FC = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {notes.map((note) => (
-            <div
-              key={note._id}
-              className="bg-white p-4 rounded-lg shadow hover:shadow-md transition"
-            >
-              <h2 className="text-lg font-semibold text-gray-800">
-                {note.title}
-              </h2>
-              <p className="text-gray-600 mt-2">{note.content}</p>
-              <p className="text-xs text-gray-400 mt-4">
-                {new Date(note.createdAt).toLocaleString()}
-              </p>
-            </div>
+            <NoteCard key={note._id} note={note} onDelete={handleDelete} />
           ))}
         </div>
       )}
@@ -118,21 +120,15 @@ const Dashboard: React.FC = () => {
             />
             <textarea
               placeholder="Content"
-              value={newContent}
-              onChange={(e) => setNewContent(e.target.value)}
+              value={newBody}
+              onChange={(e) => setNewBody(e.target.value)}
               className="w-full border p-2 rounded mb-3 h-28"
             />
             <div className="flex justify-end gap-3">
-              <button
-                onClick={() => setShowModal(false)}
-                className="px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400"
-              >
+              <button onClick={() => setShowModal(false)} className="px-4 py-2 bg-gray-300 rounded-lg">
                 Cancel
               </button>
-              <button
-                onClick={handleAddNote}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-              >
+              <button onClick={handleAddNote} className="px-4 py-2 bg-blue-600 text-white rounded-lg">
                 Save
               </button>
             </div>

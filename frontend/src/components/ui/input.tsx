@@ -8,6 +8,7 @@ type InputProps = {
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   placeholder?: string;
   className?: string;
+  maxLength?: number;
 };
 
 const Input: React.FC<InputProps> = ({
@@ -18,6 +19,7 @@ const Input: React.FC<InputProps> = ({
   onChange,
   placeholder,
   className = "",
+  maxLength,
 }) => {
   return (
     <div className="flex flex-col gap-1">
@@ -28,8 +30,8 @@ const Input: React.FC<InputProps> = ({
         value={value}
         onChange={onChange}
         placeholder={placeholder}
-        className={`px-3 py-2 rounded-lg border border-gray-300 focus:outline-none 
-          focus:ring-2 focus:ring-blue-500 transition-all duration-200 ${className}`}
+        maxLength={maxLength}
+        className={`px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200 ${className}`}
       />
     </div>
   );

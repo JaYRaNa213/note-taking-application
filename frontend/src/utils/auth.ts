@@ -23,3 +23,7 @@ export const removeUser = () => {
   localStorage.removeItem("user");
 };
 
+export const clearAuth = () => {
+  removeToken();
+  removeUser();
+};

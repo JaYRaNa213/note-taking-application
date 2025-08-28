@@ -1,9 +1,7 @@
 import React from "react";
-import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
+import { GoogleLogin } from "@react-oauth/google";
 import api from "../api/api";
 import { setToken, setUser } from "../utils/auth";
-
-const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || "";
 
 interface Props {
   onSuccess?: () => void;
@@ -12,34 +10,31 @@ interface Props {
 const GoogleSignInButton: React.FC<Props> = ({ onSuccess }) => {
   const handleLoginSuccess = async (credentialResponse: any) => {
     try {
-      if (!credentialResponse.credential) {
-        console.error("No credential received from Google");
+      const id_token = credentialResponse?.credential;
+      if (!id_token) {
+        console.error("No Google credential received");
         return;
       }
-
-      // Send Google token (id_token) to backend
-      const res = await api.post("/auth/google", {
-        id_token: credentialResponse.credential,
-      });
-
-      setToken(res.data.token);
-      setUser(res.data.user);
-
-      if (onSuccess) onSuccess();
+      const res = await api.post("/auth/google", { id_token });
+      if (res?.data?.token) {
+        setToken(res.data.token);
+        setUser(res.data.user);
+        if (onSuccess) onSuccess();
+      } else {
+        console.error("Unexpected response from /auth/google", res.data);
+      }
     } catch (err) {
       console.error("Google login error:", err);
+      alert("Google login failed");
     }
   };
 
   const handleLoginError = () => {
-    console.error("Google login failed");
+    console.error("Google login failed (client)");
+    alert("Google login failed");
   };
 
-  return (
-    <GoogleOAuthProvider clientId={clientId}>
-      <GoogleLogin onSuccess={handleLoginSuccess} onError={handleLoginError} />
-    </GoogleOAuthProvider>
-  );
+  return <GoogleLogin onSuccess={handleLoginSuccess} onError={handleLoginError} />;
 };
 
 export default GoogleSignInButton;
