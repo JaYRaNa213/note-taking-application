@@ -1,6 +1,6 @@
 import mongoose, { Schema, Document } from "mongoose";
 
-interface IUser extends Document {
+export interface IUser extends Document {
   name?: string;
   email: string;
   password?: string;
@@ -15,7 +15,7 @@ const userSchema = new Schema<IUser>(
   {
     name: { type: String },
     email: { type: String, required: true, unique: true },
-    password: { type: String }, // for register/login
+    password: { type: String },
     googleId: { type: String },
     otp: {
       codeHash: String,
