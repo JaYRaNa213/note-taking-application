@@ -1,89 +1,146 @@
-import React, { useEffect, useState } from 'react';
-import { Container, Typography, Box, TextField, Button, Grid, Paper, IconButton } from '@mui/material';
-import { api } from '../api/api';
-import { getToken, removeToken } from '../utils/auth';
-import { setAuthToken } from '../api/api';
-import DeleteIcon from '@mui/icons-material/Delete';
+"use client";
+import React, { useEffect, useState } from "react";
+import api from "../api/api";
+import { getUser, removeUser } from "../utils/auth";
+import { useNavigate } from "react-router-dom";
 
-interface Note { _id: string; title: string; body: string; createdAt: string; }
+interface Note {
+  _id: string;
+  title: string;
+  content: string;
+  createdAt: string;
+}
 
-export default function Dashboard() {
+const Dashboard: React.FC = () => {
+  const navigate = useNavigate();
   const [notes, setNotes] = useState<Note[]>([]);
-  const [title, setTitle] = useState('');
-  const [body, setBody] = useState('');
-  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [showModal, setShowModal] = useState(false);
+  const [newTitle, setNewTitle] = useState("");
+  const [newContent, setNewContent] = useState("");
+  const user = getUser();
 
-  const load = async () => {
+  // fetch notes
+  const fetchNotes = async () => {
     try {
-      const res = await api.get('/notes');
-      setNotes(res.data.notes);
-    } catch (err: any) {
-      setError(err?.response?.data?.message || 'Failed to load notes');
+      const res = await api.get("/notes");
+      setNotes(res.data);
+    } catch (err) {
+      console.error("Error fetching notes:", err);
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
-    const token = getToken();
-    if (!token) {
-      window.location.href = '/';
-      return;
-    }
-    setAuthToken(token);
-    load();
+    fetchNotes();
   }, []);
 
-  const create = async () => {
-    try {
-      await api.post('/notes', { title, body });
-      setTitle(''); setBody('');
-      load();
-    } catch (err: any) {
-      setError(err?.response?.data?.message || 'Create failed');
-    }
+  const handleLogout = () => {
+    removeUser();
+    navigate("/login");
   };
 
-  const del = async (id: string) => {
+  const handleAddNote = async () => {
+    if (!newTitle.trim() || !newContent.trim()) return;
     try {
-      await api.delete(`/notes/${id}`);
-      setNotes(n => n.filter(x => x._id !== id));
-    } catch (err: any) {
-      setError(err?.response?.data?.message || 'Delete failed');
+      const res = await api.post("/notes", {
+        title: newTitle,
+        content: newContent,
+      });
+      setNotes([res.data, ...notes]);
+      setShowModal(false);
+      setNewTitle("");
+      setNewContent("");
+    } catch (err) {
+      console.error("Error adding note:", err);
     }
-  };
-
-  const logout = () => {
-    removeToken();
-    setAuthToken(undefined);
-    window.location.href = '/';
   };
 
   return (
-    <Container sx={{ pt: 4 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Typography variant="h5">Welcome</Typography>
-        <Button onClick={logout}>Logout</Button>
-      </Box>
+    <div className="min-h-screen bg-gray-100 p-6">
+      {/* Header */}
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold text-gray-800">
+          Welcome, {user?.name || "User"} 👋
+        </h1>
+        <button
+          onClick={handleLogout}
+          className="px-4 py-2 bg-red-500 text-white rounded-lg shadow hover:bg-red-600"
+        >
+          Logout
+        </button>
+      </div>
 
-      <Box sx={{ mt: 3 }}>
-        <TextField label="Title" fullWidth value={title} onChange={e => setTitle(e.target.value)} />
-        <TextField label="Body" fullWidth multiline rows={4} value={body} onChange={e => setBody(e.target.value)} sx={{ mt: 2 }} />
-        <Button variant="contained" sx={{ mt: 2 }} onClick={create}>Create Note</Button>
-      </Box>
+      {/* Add Note Button */}
+      <button
+        onClick={() => setShowModal(true)}
+        className="mb-6 px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700"
+      >
+        + Add Note
+      </button>
 
-      <Grid container spacing={2} sx={{ mt: 3 }}>
-        {notes.map(n => (
-          <Grid item xs={12} sm={6} key={n._id}>
-            <Paper sx={{ p:2 }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                <Typography variant="subtitle1">{n.title || '(no title)'}</Typography>
-                <IconButton onClick={() => del(n._id)}><DeleteIcon/></IconButton>
-              </Box>
-              <Typography variant="body2">{n.body}</Typography>
-              <Typography variant="caption" sx={{ display: 'block', mt: 1 }}>{new Date(n.createdAt).toLocaleString()}</Typography>
-            </Paper>
-          </Grid>
-        ))}
-      </Grid>
-    </Container>
+      {/* Notes List */}
+      {loading ? (
+        <p>Loading notes...</p>
+      ) : notes.length === 0 ? (
+        <p className="text-gray-600">No notes yet. Start by adding one!</p>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {notes.map((note) => (
+            <div
+              key={note._id}
+              className="bg-white p-4 rounded-lg shadow hover:shadow-md transition"
+            >
+              <h2 className="text-lg font-semibold text-gray-800">
+                {note.title}
+              </h2>
+              <p className="text-gray-600 mt-2">{note.content}</p>
+              <p className="text-xs text-gray-400 mt-4">
+                {new Date(note.createdAt).toLocaleString()}
+              </p>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Add Note Modal */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-96">
+            <h2 className="text-xl font-semibold mb-4">Add New Note</h2>
+            <input
+              type="text"
+              placeholder="Title"
+              value={newTitle}
+              onChange={(e) => setNewTitle(e.target.value)}
+              className="w-full border p-2 rounded mb-3"
+            />
+            <textarea
+              placeholder="Content"
+              value={newContent}
+              onChange={(e) => setNewContent(e.target.value)}
+              className="w-full border p-2 rounded mb-3 h-28"
+            />
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setShowModal(false)}
+                className="px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleAddNote}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
   );
-}
+};
+
+export default Dashboard;

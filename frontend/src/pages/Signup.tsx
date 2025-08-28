@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Container, TextField, Button, Typography, Box, Alert } from '@mui/material';
-import { api } from '../api/api';
+import api  from '../api/api';
 import { useNavigate } from 'react-router-dom';
 import GoogleSignInButton from '../components/GoogleSignInButton';
 
