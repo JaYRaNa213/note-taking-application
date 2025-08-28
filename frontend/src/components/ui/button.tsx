@@ -1,30 +1,39 @@
+"use client";
 import React from "react";
+import Button from "@mui/material/Button";
 
-type ButtonProps = {
+interface AppButtonProps {
   children: React.ReactNode;
   onClick?: () => void;
   type?: "button" | "submit" | "reset";
+  variant?: "contained" | "outlined" | "text";
+  color?: "primary" | "secondary" | "error" | "success" | "warning" | "info";
+  fullWidth?: boolean;
   disabled?: boolean;
-  className?: string;
-};
+}
 
-const Button: React.FC<ButtonProps> = ({
+const AppButton: React.FC<AppButtonProps> = ({
   children,
   onClick,
   type = "button",
+  variant = "contained",
+  color = "primary",
+  fullWidth = false,
   disabled = false,
-  className = "",
 }) => {
   return (
-    <button
-      type={type}
+    <Button
       onClick={onClick}
+      type={type}
+      variant={variant}
+      color={color}
+      fullWidth={fullWidth}
       disabled={disabled}
-      className={`px-4 py-2 rounded-lg font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 transition-colors duration-200 ${className}`}
+      sx={{ borderRadius: 2, textTransform: "none", fontSize: "1rem" }}
     >
       {children}
-    </button>
+    </Button>
   );
 };
 
-export default Button;
+export default AppButton;

@@ -1,21 +1,36 @@
 import React from "react";
-import { createRoot } from "react-dom/client";
-import { GoogleOAuthProvider } from "@react-oauth/google";
-import App from "./App";
-import { getToken } from "./utils/auth";
-import api from "./api/api";
+import ReactDOM from "react-dom/client";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { ThemeProvider, CssBaseline, createTheme } from "@mui/material";
+import Signup from "./pages/Signup";
+import OTPVerify from "./pages/OTPVerify";
+import Login from "./pages/Login";
+import Dashboard from "./pages/Dashboard";
+import "./index.css";
 
-const token = getToken();
-if (token) {
-  api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-}
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: "#1976d2", // Blue
+    },
+    secondary: {
+      main: "#dc004e", // Pink
+    },
+  },
+});
 
-const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
-
-createRoot(document.getElementById("root")!).render(
+ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <GoogleOAuthProvider clientId={clientId}>
-      <App />
-    </GoogleOAuthProvider>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Signup />} />
+          <Route path="/otp-verify" element={<OTPVerify />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+        </Routes>
+      </BrowserRouter>
+    </ThemeProvider>
   </React.StrictMode>
 );

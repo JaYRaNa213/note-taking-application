@@ -1,3 +1,4 @@
+├── .gitignore
 ├── backend
 │   ├── .env
 │   ├── .env.example
@@ -28,6 +29,7 @@
 ├── frontend
 │   ├── .env
 │   ├── .env.example
+│   ├── index.html
 │   ├── package-lock.json
 │   ├── package.json
 │   ├── public
@@ -37,15 +39,20 @@
 │   │   ├── App.tsx
 │   │   ├── components
 │   │   │   ├── GoogleSignInButton.tsx
-│   │   │   └── NoteCard.tsx
+│   │   │   ├── NoteCard.tsx
+│   │   │   └── ui
+│   │   │       ├── button.tsx
+│   │   │       └── input.tsx
+│   │   ├── index.css
 │   │   ├── main.tsx
 │   │   ├── pages
 │   │   │   ├── Dashboard.tsx
 │   │   │   ├── Login.tsx
 │   │   │   ├── OTPVerify.tsx
 │   │   │   └── Signup.tsx
-│   │   └── utils
-│   │       └── auth.ts
+│   │   ├── utils
+│   │   │   └── auth.ts
+│   │   └── vite-env.d.ts
 │   └── tsconfig.json
 ├── tree.js
 └── tree.txt

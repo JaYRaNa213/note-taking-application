@@ -2,11 +2,11 @@ export const setToken = (token: string) => {
   localStorage.setItem("token", token);
 };
 
-export const getToken = () => {
+export const getToken = (): string | null => {
   return localStorage.getItem("token");
 };
 
-export const removeToken = () => {
+export const clearToken = () => {
   localStorage.removeItem("token");
 };
 
@@ -19,11 +19,6 @@ export const getUser = () => {
   return user ? JSON.parse(user) : null;
 };
 
-export const removeUser = () => {
-  localStorage.removeItem("user");
-};
-
 export const clearAuth = () => {
-  removeToken();
-  removeUser();
+  localStorage.removeItem("user");
 };

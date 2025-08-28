@@ -1,9 +1,16 @@
 import { useState } from "react";
-import Button from "../components/ui/button";
-import Input from "../components/ui/input";
 import { useNavigate, useLocation } from "react-router-dom";
 import api from "../api/api";
 import { setToken, setUser } from "../utils/auth";
+import AppButton from "../components/ui/button";
+import AppInput from "../components/ui/input";
+import {
+  Container,
+  Box,
+  Typography,
+  CircularProgress,
+  Link,
+} from "@mui/material";
 
 const OTPVerify = () => {
   const [otp, setOtp] = useState("");
@@ -12,6 +19,7 @@ const OTPVerify = () => {
   const [error, setError] = useState("");
   const navigate = useNavigate();
   const location = useLocation();
+
   // email passed from Signup via navigate state
   const state: any = location.state;
   const email: string | undefined = state?.email;
@@ -50,8 +58,7 @@ const OTPVerify = () => {
 
     try {
       await api.post("/auth/otp/request", { email });
-      // success message
-      setError("OTP resent (check your email)");
+      setError("✅ OTP resent (check your email)");
     } catch (err: any) {
       setError(err.response?.data?.message || "Something went wrong");
     } finally {
@@ -60,36 +67,53 @@ const OTPVerify = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-50">
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-8">
-        <h2 className="text-2xl font-bold text-center mb-6">OTP Verification</h2>
+    <Container maxWidth="sm">
+      <Box
+        sx={{
+          mt: 10,
+          p: 4,
+          bgcolor: "background.paper",
+          borderRadius: 2,
+          boxShadow: 3,
+          textAlign: "center",
+        }}
+      >
+        <Typography variant="h5" fontWeight="bold" gutterBottom>
+          OTP Verification
+        </Typography>
 
-        <Input
-          type="text"
-          placeholder="Enter 6-digit OTP"
+        <AppInput
+          label="Enter 6-digit OTP"
           value={otp}
           onChange={(e) => setOtp(e.target.value)}
-          maxLength={6}
-          className="text-center text-lg tracking-widest"
+          type="text"
+          placeholder="123456"
         />
 
-        {error && <p className="text-red-500 text-sm mt-2 text-center">{error}</p>}
+        {error && (
+          <Typography variant="body2" color="error" sx={{ mt: 1 }}>
+            {error}
+          </Typography>
+        )}
 
-        <Button onClick={handleVerify} disabled={loading} className="w-full mt-4">
-          {loading ? "Verifying..." : "Verify OTP"}
-        </Button>
+        <Box sx={{ mt: 3 }}>
+          <AppButton onClick={handleVerify} disabled={loading} fullWidth>
+            {loading ? <CircularProgress size={22} /> : "Verify OTP"}
+          </AppButton>
+        </Box>
 
-        <div className="flex justify-center mt-4">
-          <button
+        <Box sx={{ mt: 2 }}>
+          <Link
+            component="button"
             onClick={handleResend}
             disabled={resendLoading}
-            className="text-sm text-blue-600 hover:underline disabled:text-gray-400"
+            sx={{ fontSize: "0.9rem" }}
           >
             {resendLoading ? "Resending..." : "Resend OTP"}
-          </button>
-        </div>
-      </div>
-    </div>
+          </Link>
+        </Box>
+      </Box>
+    </Container>
   );
 };
 
