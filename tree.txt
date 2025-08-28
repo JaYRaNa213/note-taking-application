@@ -1,0 +1,51 @@
+├── backend
+│   ├── .env
+│   ├── .env.example
+│   ├── package-lock.json
+│   ├── package.json
+│   ├── src
+│   │   ├── app.ts
+│   │   ├── config
+│   │   │   └── env.ts
+│   │   ├── controllers
+│   │   │   ├── auth.controller.ts
+│   │   │   └── notes.controller.ts
+│   │   ├── index.ts
+│   │   ├── middlewares
+│   │   │   └── auth.middleware.ts
+│   │   ├── models
+│   │   │   ├── note.model.ts
+│   │   │   └── user.model.ts
+│   │   ├── routes
+│   │   │   ├── auth.routes.ts
+│   │   │   └── notes.routes.ts
+│   │   ├── types
+│   │   │   └── express.d.ts
+│   │   └── utils
+│   │       ├── jwt.ts
+│   │       └── mailer.ts
+│   └── tsconfig.json
+├── frontend
+│   ├── .env
+│   ├── .env.example
+│   ├── package-lock.json
+│   ├── package.json
+│   ├── public
+│   ├── src
+│   │   ├── api
+│   │   │   └── api.ts
+│   │   ├── App.tsx
+│   │   ├── components
+│   │   │   ├── GoogleSignInButton.tsx
+│   │   │   └── NoteCard.tsx
+│   │   ├── main.tsx
+│   │   ├── pages
+│   │   │   ├── Dashboard.tsx
+│   │   │   ├── Login.tsx
+│   │   │   ├── OTPVerify.tsx
+│   │   │   └── Signup.tsx
+│   │   └── utils
+│   │       └── auth.ts
+│   └── tsconfig.json
+├── tree.js
+└── tree.txt
